@@ -4,6 +4,9 @@ export const $RAW = Symbol("store-raw"),
   $NAME = Symbol("store-name");
 
 export type StoreNode = Record<PropertyKey, any>;
+export namespace SolidStore {
+  export interface Unwrappable {}
+}
 export type NotWrappable =
   | string
   | number
@@ -12,7 +15,8 @@ export type NotWrappable =
   | boolean
   | Function
   | null
-  | undefined;
+  | undefined
+  | SolidStore.Unwrappable[keyof SolidStore.Unwrappable];
 export type Store<T> = DeepReadonly<T>;
 
 function wrap<T extends StoreNode>(value: T, name?: string): DeepReadonly<T> {
@@ -217,13 +221,17 @@ export function updatePath(current: StoreNode, path: any[], traversed: PropertyK
 
 export type DeepReadonly<T> = 0 extends 1 & T
   ? T
+  : T extends NotWrappable
+  ? T
   : {
-      readonly [K in keyof T]: T[K] extends NotWrappable ? T[K] : DeepReadonly<T[K]>;
+      readonly [K in keyof T]: T[K];
     };
 export type DeepMutable<T> = 0 extends 1 & T
   ? T
+  : T extends NotWrappable
+  ? T
   : {
-      -readonly [K in keyof T]: T[K] extends NotWrappable ? T[K] : DeepMutable<T[K]>;
+      -readonly [K in keyof T]: T[K];
     };
 
 export type StorePathRange = { from?: number; to?: number; by?: number };
@@ -234,7 +242,9 @@ export type StoreSetter<T, U extends PropertyKey[] = []> =
   | ((
       prevState: DeepReadonly<T>,
       traversed: U
-    ) => DeepReadonly<T> | Partial<DeepReadonly<T>> | void)
+    ) => T | Partial<T> | DeepReadonly<T> | Partial<DeepReadonly<T>> | void)
+  | T
+  | Partial<T>
   | DeepReadonly<T>
   | Partial<DeepReadonly<T>>;
 
