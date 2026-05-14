@@ -18,7 +18,8 @@ import {
   createContext,
   useContext,
   getOwner,
-  runWithOwner
+  runWithOwner,
+  children
 } from "../src/index.js";
 
 import "./MessageChannel";
@@ -748,6 +749,16 @@ describe("create and use context", () => {
     const context = createContext<number>();
     const res = useContext(context);
     expect(res).toBe<typeof res>(undefined);
+  });
+});
+
+describe("children", () => {
+  test("resolves large nested arrays", () => {
+    createRoot(() => {
+      const items = Array.from({ length: 100000 }, (_, i) => i);
+      const resolved = children(() => [items]);
+      expect(resolved.toArray()).toHaveLength(items.length);
+    });
   });
 });
 

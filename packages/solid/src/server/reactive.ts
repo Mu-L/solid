@@ -241,13 +241,8 @@ function resolveChildren(children: any): unknown {
     for (let i = 0; i < children.length; i++) {
       const result = resolveChildren(children[i]);
       if (Array.isArray(result)) {
-        if (result.length > 32768) {
-          for (let i = 0; i < result.length; i += 32768) {
-            results.push.apply(results, result.slice(i, Math.min(i + 32768, result.length)));
-          }
-        } else {
-          results.push.apply(results, result);
-        }
+        if (result.length < 32768) results.push.apply(results, result);
+        else for (let j = 0; j < result.length; j++) results.push(result[j]);
       } else {
         results.push(result);
       }
