@@ -23,6 +23,15 @@ describe("setState with reconcile", () => {
     expect(state.missing).toBeUndefined();
   });
 
+  test("Reconcile skips unsafe object keys", () => {
+    const [state, setState] = createStore<Record<string, any>>({ data: 2 });
+    const next = JSON.parse('{"data":5,"__proto__":{"polluted":true}}');
+    next.constructor = { prototype: { polluted: true } };
+    setState(reconcile(next));
+    expect(state.data).toBe(5);
+    expect(({} as any).polluted).toBeUndefined();
+  });
+
   test("Reconcile array with nulls", () => {
     const [state, setState] = createStore([null, "a"]);
     expect(state[0]).toBe(null);

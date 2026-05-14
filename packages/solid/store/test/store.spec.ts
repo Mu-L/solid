@@ -911,11 +911,24 @@ describe("Prototype pollution guard", () => {
     expect(({} as any).polluted_c).toBeUndefined();
   });
 
-  test("setStore cannot pollute via JSON-parsed __proto__ own property merge", () => {
-    const [, setStore] = createStore<Record<string, any>>({ a: 1 });
-    const evil = JSON.parse('{"__proto__": {"polluted_d": true}}');
+  test("setStore skips unsafe own keys while merging safe keys", () => {
+    const [store, setStore] = createStore<Record<string, any>>({ a: 1 });
+    const evil = JSON.parse('{"__proto__":{"polluted":true}}');
+    evil.safe = true;
+    evil.constructor = { prototype: { polluted: true } };
+    evil.prototype = { polluted: true };
     setStore(evil);
-    expect(({} as any).polluted_d).toBeUndefined();
+    expect(store.a).toBe(1);
+    expect(store.safe).toBe(true);
+    expect(({} as any).polluted).toBeUndefined();
+  });
+
+  test("setStore allows constructor and prototype as final keys", () => {
+    const [store, setStore] = createStore<Record<string, any>>({ a: 1 });
+    setStore("constructor", "value");
+    setStore("prototype", "value");
+    expect(store.constructor).toBe("value");
+    expect(store.prototype).toBe("value");
   });
 });
 

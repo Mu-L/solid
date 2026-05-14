@@ -2,6 +2,10 @@ import { setProperty, unwrap, isWrappable, StoreNode, $RAW } from "./store.js";
 
 const $ROOT = Symbol("store-root");
 
+function isUnsafeKey(property: PropertyKey) {
+  return property === "__proto__" || property === "constructor" || property === "prototype";
+}
+
 export type ReconcileOptions = {
   key?: string | null;
   merge?: boolean;
@@ -14,6 +18,7 @@ function applyState(
   merge: boolean | undefined,
   key: string | null
 ) {
+  if (isUnsafeKey(property)) return;
   const previous = parent[property];
   if (target === previous) return;
   const isArray = Array.isArray(target);
@@ -117,6 +122,7 @@ function applyState(
 
   const targetKeys = Object.keys(target);
   for (let i = 0, len = targetKeys.length; i < len; i++) {
+    if (isUnsafeKey(targetKeys[i])) continue;
     applyState(target[targetKeys[i]], previous, targetKeys[i], merge, key);
   }
   const previousKeys = Object.keys(previous);

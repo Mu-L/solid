@@ -231,11 +231,8 @@ export function setProperty(
   value: any,
   deleting: boolean = false
 ): void {
-  // Prototype pollution guard: refuse to redefine the prototype chain via
-  // `state.__proto__ = ...` or to overwrite built-in prototype links.
   if (property === "__proto__") {
-    if (IS_DEV)
-      console.warn(`Refusing to set "__proto__" on a store (prototype pollution guard).`);
+    if (IS_DEV) console.warn(`Refusing to set "__proto__" on a store.`);
     return;
   }
   if (!deleting && state[property] === value) return;
@@ -267,8 +264,13 @@ function mergeStoreNode(state: StoreNode, value: Partial<StoreNode>) {
   const keys = Object.keys(value);
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
+    if (isUnsafeKey(key)) continue;
     setProperty(state, key, value[key]);
   }
+}
+
+function isUnsafeKey(property: PropertyKey) {
+  return property === "__proto__" || property === "constructor" || property === "prototype";
 }
 
 function updateArray(
@@ -297,18 +299,8 @@ export function updatePath(current: StoreNode, path: any[], traversed: PropertyK
     const partType = typeof part,
       isArray = Array.isArray(current);
 
-    // Prototype pollution guard: refuse to traverse into dangerous keys
-    // (e.g. `setStore("__proto__", ...)` or
-    // `setStore("constructor", "prototype", ...)`), which would otherwise
-    // let callers reach and mutate Object.prototype / Function.prototype.
-    if (
-      partType === "string" &&
-      (part === "__proto__" || part === "constructor" || part === "prototype")
-    ) {
-      if (IS_DEV)
-        console.warn(
-          `Refusing to traverse into "${part}" on a store (prototype pollution guard).`
-        );
+    if (partType === "string" && (part === "__proto__" || (path.length > 1 && isUnsafeKey(part)))) {
+      if (IS_DEV) console.warn(`Refusing to traverse unsafe key "${part}" on a store.`);
       return;
     }
 
