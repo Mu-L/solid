@@ -8,8 +8,8 @@ export type {
   SetStoreFunction,
   SolidStore,
   Store,
-  StoreBundle,
   StoreNode,
+  StoreReturn,
   StorePathRange,
   StoreSetter
 } from "./store.js";

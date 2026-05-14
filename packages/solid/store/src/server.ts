@@ -1,4 +1,4 @@
-import type { SetStoreFunction, Store } from "./store.js";
+import type { SetStoreFunction, Store, StoreReturn } from "./store.js";
 
 export type {
   ArrayFilterFn,
@@ -10,6 +10,7 @@ export type {
   SolidStore,
   Store,
   StoreNode,
+  StoreReturn,
   StorePathRange,
   StoreSetter
 } from "./store.js";
@@ -105,7 +106,7 @@ export function updatePath(current: any, path: any[], traversed: PropertyKey[] =
   } else setProperty(current, part, value);
 }
 
-export function createStore<T>(state: T | Store<T>): [Store<T>, SetStoreFunction<T>] {
+export function createStore<T>(state: T | Store<T>): StoreReturn<T> {
   const isArray = Array.isArray(state);
   function setStore(...args: any[]): void {
     isArray && args.length === 1 ? updateArray(state, args[0]) : updatePath(state, args);
