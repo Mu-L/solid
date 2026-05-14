@@ -753,6 +753,37 @@ describe("Nested Classes", () => {
     expect(sum).toBe(15);
   });
 
+  test("wrapped nested class getter leaves methods unenumerable", () => {
+    class CustomThing {
+      a: number;
+      constructor(value: number) {
+        this.a = value;
+      }
+      get doubled(): number {
+        return this.a * 2;
+      }
+      method(): number {
+        return this.a;
+      }
+    }
+
+    const [inner] = createStore(new CustomThing(1));
+    const [store, setStore] = createStore({ inner });
+
+    expect(store.inner.doubled).toBe(2);
+    expect(Object.keys(inner)).toStrictEqual(["a"]);
+
+    let doubled;
+    createRoot(() => {
+      createEffect(() => {
+        doubled = store.inner.doubled;
+      });
+    });
+    expect(doubled).toBe(2);
+    setStore("inner", "a", 10);
+    expect(doubled).toBe(20);
+  });
+
   test("not wrapped nested class", () => {
     class CustomThing {
       a: number;
