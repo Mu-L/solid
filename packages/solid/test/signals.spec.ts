@@ -123,6 +123,75 @@ describe("Update signals", () => {
     setValue(() => () => "Hello");
     expect(value()()).toBe("Hello");
   });
+  test("Repeated signal reads update once per write", () => {
+    const [value, setValue] = createSignal(0);
+    let runs = 0,
+      total = 0;
+    createRoot(() => {
+      createEffect(() => {
+        runs++;
+        total = 0;
+        for (let i = 0; i < 1000; i++) total += value();
+      });
+    });
+
+    expect(runs).toBe(1);
+    expect(total).toBe(0);
+    setValue(1);
+    expect(runs).toBe(2);
+    expect(total).toBe(1000);
+  });
+  test("Repeated signal reads clean up when disposed", () => {
+    const [value, setValue] = createSignal(0);
+    let runs = 0;
+    const dispose = createRoot(dispose => {
+      createEffect(() => {
+        runs++;
+        for (let i = 0; i < 1000; i++) value();
+      });
+      return dispose;
+    });
+
+    expect(runs).toBe(1);
+    setValue(1);
+    expect(runs).toBe(2);
+    dispose();
+    setValue(2);
+    expect(runs).toBe(2);
+  });
+  test("Repeated signal reads clean up conditional dependencies", () => {
+    const [enabled, setEnabled] = createSignal(true);
+    const [value, setValue] = createSignal(0);
+    let runs = 0,
+      total = 0;
+
+    createRoot(() => {
+      createEffect(() => {
+        runs++;
+        total = 0;
+        if (enabled()) {
+          for (let i = 0; i < 1000; i++) total += value();
+        }
+      });
+    });
+
+    expect(runs).toBe(1);
+    expect(total).toBe(0);
+    setValue(1);
+    expect(runs).toBe(2);
+    expect(total).toBe(1000);
+    setEnabled(false);
+    expect(runs).toBe(3);
+    expect(total).toBe(0);
+    setValue(2);
+    expect(runs).toBe(3);
+    setEnabled(true);
+    expect(runs).toBe(4);
+    expect(total).toBe(2000);
+    setValue(3);
+    expect(runs).toBe(5);
+    expect(total).toBe(3000);
+  });
   test("Create and trigger a Memo", () => {
     createRoot(() => {
       const [name, setName] = createSignal("John"),
