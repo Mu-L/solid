@@ -1,5 +1,19 @@
 # solid-js
 
+## 1.9.13
+
+### Patch Changes
+
+- cfde0a1: Harden store updates against prototype pollution.
+- 4649b37: Update DOM expression runtimes to 0.40.8 to expose `classList` types.
+- a7959ca: Fix proxy invariant crash when a produce draft is returned from a getter.
+- bcc0d5d: Add `StoreReturn<T>` type
+- dad5b06: fix(store): prevent prototype pollution via setStore paths
+- 704e908: Deduplicate repeated signal reads within a computation.
+- 4b1919a: Fix createResource initial value inference
+- d598b4b: fix "Maximum call stack size exceeded" on `resolveChildren`s `results.push.apply(results, result)`
+- 72e97e8: fix class/prototype getters not getting wrapped
+
 ## 1.9.12
 
 ### Patch Changes
