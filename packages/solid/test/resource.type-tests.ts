@@ -56,6 +56,21 @@ type Equals<X, Y> =
   type Tests = Assert<Equals<ResourceActions["mutate"], Setter<number>>>;
 }
 
+// without source
+// with fetcher, nullable initialValue
+{
+  const resourceReturn = createResource(
+    () => {
+      return Promise.resolve(1);
+    },
+    {
+      initialValue: null
+    }
+  );
+
+  type Tests = Assert<Equals<typeof resourceReturn, InitializedResourceReturn<number | null>>>;
+}
+
 // without initialValue
 // with source, fetcher
 {
@@ -103,6 +118,21 @@ type Equals<X, Y> =
       }
     }
   );
+}
+
+// with source, fetcher, nullable initialValue
+{
+  const resourceReturn = createResource(
+    () => 1,
+    () => {
+      return Promise.resolve(1);
+    },
+    {
+      initialValue: null
+    }
+  );
+
+  type Tests = Assert<Equals<typeof resourceReturn, InitializedResourceReturn<number | null>>>;
 }
 
 /* Resource type tests */
