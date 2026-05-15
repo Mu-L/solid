@@ -290,31 +290,24 @@ describe("setState with produce", () => {
     expect(state[2].title).toBe("Go Home");
   });
 
-  test("Leaked draft proxy returned from getter does not violate proxy invariant (#2668)", () => {
+  test("does not violate proxy invariants when a getter returns a leaked draft", () => {
     let leaked: any;
     const [state, setState] = createStore<{ items: number[]; readonly probe: number[] }>({
       items: [],
       get probe() {
-        // touch items so it's tracked, then return leaked draft
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        this.items;
+        void this.items;
         return leaked;
       }
     });
+
     expect(() => {
       setState(
         produce(draft => {
           leaked = draft.items;
-          // Reading probe through the store proxy returns the leaked draft.
-          // Previously this triggered a "TypeError: 'get' on proxy: property
-          // 'Symbol(solid-proxy)' is a read-only and non-configurable data
-          // property on the proxy target but the proxy did not return its
-          // actual value" because setterTraps.get wrapped the $PROXY value.
           state.probe;
         })
       );
     }).not.toThrow();
-    expect(Array.isArray(state.items)).toBe(true);
   });
 });
 

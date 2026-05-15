@@ -2,4 +2,4 @@
 "solid-js": patch
 ---
 
-Fix proxy invariant crash when produce draft is returned from a getter 
+Fix proxy invariant crash when a produce draft is returned from a getter.
