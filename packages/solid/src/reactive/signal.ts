@@ -577,19 +577,19 @@ function isPromise(v: any): v is Promise<any> {
  *
  * @description https://docs.solidjs.com/reference/basic-reactivity/create-resource
  */
-export function createResource<T, R = unknown>(
-  fetcher: ResourceFetcher<true, T, R>,
-  options: InitializedResourceOptions<NoInfer<T>, true>
-): InitializedResourceReturn<T, R>;
+export function createResource<T, R = unknown, I = T>(
+  fetcher: (k: true, info: ResourceFetcherInfo<T | I, R>) => T | Promise<T>,
+  options: ResourceOptions<T | I, true> & { initialValue: I }
+): InitializedResourceReturn<T | I, R>;
 export function createResource<T, R = unknown>(
   fetcher: ResourceFetcher<true, T, R>,
   options?: ResourceOptions<NoInfer<T>, true>
 ): ResourceReturn<T, R>;
-export function createResource<T, S, R = unknown>(
+export function createResource<T, S, R = unknown, I = T>(
   source: ResourceSource<S>,
-  fetcher: ResourceFetcher<S, T, R>,
-  options: InitializedResourceOptions<NoInfer<T>, S>
-): InitializedResourceReturn<T, R>;
+  fetcher: (k: S, info: ResourceFetcherInfo<T | I, R>) => T | Promise<T>,
+  options: ResourceOptions<T | I, S> & { initialValue: I }
+): InitializedResourceReturn<T | I, R>;
 export function createResource<T, S, R = unknown>(
   source: ResourceSource<S>,
   fetcher: ResourceFetcher<S, T, R>,
