@@ -115,6 +115,24 @@ describe("Testing a Portal with Synthetic Events", () => {
   test("dispose", () => disposer());
 });
 
+describe("Testing a Portal whose mount is externally cleared before disposal", () => {
+  let div = document.createElement("div"),
+    disposer: () => void;
+  const testMount = document.createElement("div");
+  const Component = () => <Portal mount={testMount}>Hi</Portal>;
+
+  test("Create portal", () => {
+    disposer = render(Component, div);
+    expect((testMount.firstChild as HTMLDivElement).innerHTML).toBe("Hi");
+  });
+
+  test("dispose does not throw when mount has been externally emptied", () => {
+    // Simulate an external actor clearing the mount node (e.g. innerHTML = "")
+    testMount.innerHTML = "";
+    expect(() => disposer()).not.toThrow();
+  });
+});
+
 describe("Testing a Portal with direct reactive children", () => {
   let div = document.createElement("div"),
     disposer: () => void,

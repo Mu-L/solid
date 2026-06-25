@@ -101,7 +101,7 @@ export function Portal<T extends boolean = false, S extends boolean = false>(pro
         insert(renderRoot, content);
         el.appendChild(container);
         props.ref && (props as any).ref(container);
-        onCleanup(() => el.removeChild(container));
+        onCleanup(() => el.contains(container) && el.removeChild(container));
       }
     },
     undefined,
