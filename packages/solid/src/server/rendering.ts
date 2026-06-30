@@ -302,9 +302,9 @@ export function Show<T>(props: {
 }): string {
   let c: string | ((item: NonNullable<T> | Accessor<NonNullable<T>>) => string);
   return props.when
-    ? typeof (c = props.children) === "function"
+    ? typeof (c = props.children) === "function" && c.length > 0
       ? c(props.keyed ? props.when! : () => props.when as any)
-      : c
+      : (c as string)
     : props.fallback || "";
 }
 
@@ -319,7 +319,9 @@ export function Switch(props: {
     const w = conditions[i].when;
     if (w) {
       const c = conditions[i].children;
-      return typeof c === "function" ? c(conditions[i].keyed ? w : () => w) : c;
+      return typeof c === "function" && c.length > 0
+        ? c(conditions[i].keyed ? w : () => w)
+        : (c as string);
     }
   }
   return props.fallback || "";
