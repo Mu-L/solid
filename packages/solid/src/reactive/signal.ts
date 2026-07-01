@@ -633,6 +633,14 @@ export function createResource<T, S, R>(
       resolved ? "ready" : "unresolved"
     );
 
+  if (Owner)
+    onCleanup(() => {
+      for (const c of contexts.keys()) c.decrement!();
+      contexts.clear();
+      if (Transition && pr) Transition.promises.delete(pr);
+      pr = null;
+    });
+
   if (sharedConfig.context) {
     id = sharedConfig.getNextContextId();
     if (options.ssrLoadFrom === "initial") initP = options.initialValue as T;

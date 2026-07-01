@@ -3,6 +3,7 @@ import {
   createSignal,
   createResource,
   createMemo,
+  onCleanup,
   devComponent,
   $PROXY,
   SUPPORTS_PROXY,
@@ -356,7 +357,7 @@ export function splitProps<
 export function lazy<T extends Component<any>>(
   fn: () => Promise<{ default: T }>
 ): T & { preload: () => Promise<{ default: T }> } {
-  let comp: () => T | undefined;
+  let comp: (() => T | undefined) | undefined;
   let p: Promise<{ default: T }> | undefined;
   const wrap: T & { preload?: () => void } = ((props: any) => {
     const ctx = sharedConfig.context;
@@ -374,10 +375,11 @@ export function lazy<T extends Component<any>>(
     } else if (!comp) {
       const [s] = createResource<T>(() => (p || (p = fn())).then(mod => mod.default));
       comp = s;
+      onCleanup(() => (comp = undefined));
     }
     let Comp: T | undefined;
     return createMemo(() =>
-      (Comp = comp())
+      (Comp = comp?.())
         ? untrack(() => {
             if (IS_DEV) Object.assign(Comp!, { [$DEVCOMP]: true });
             if (!ctx || sharedConfig.done) return Comp!(props);
