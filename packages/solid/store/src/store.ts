@@ -188,7 +188,7 @@ const proxyTraps: ProxyHandler<StoreNode> = {
       const desc = Object.getOwnPropertyDescriptor(target, property);
       if (
         getListener() &&
-        (typeof value !== "function" || target.hasOwnProperty(property)) &&
+        (typeof value !== "function" || Object.prototype.hasOwnProperty.call(target, property)) &&
         !(desc && desc.get)
       )
         value = getNode(nodes, property, value)();

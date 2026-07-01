@@ -557,6 +557,18 @@ describe("Handling functions in state", () => {
       expect(getValue()).toBe(2);
     });
   });
+
+  test("Object.create(null) with function values in reactive reads", () => {
+    createRoot(() => {
+      const [state, setState] = createStore<{ fn: () => number; name: string }>(
+        Object.assign(Object.create(null), { fn: () => 1, name: "John" })
+      );
+      const getValue = createMemo(() => state.fn());
+      expect(getValue()).toBe(1);
+      setState({ fn: () => 2 });
+      expect(getValue()).toBe(2);
+    });
+  });
 });
 
 describe("Setting state from Effects", () => {
