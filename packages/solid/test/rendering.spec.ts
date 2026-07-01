@@ -61,7 +61,7 @@ describe("server mergeProps", () => {
 
   test("last source wins for Object.prototype-shadowing keys", () => {
     expect(mergeProps({ toString: 1 }, { toString: 2 }).toString).toBe(2);
-    expect(mergeProps({ toString: 2 }, { toString: undefined }).toString).toBe(2);
+    expect((mergeProps({ toString: 2 }, { toString: undefined }) as any).toString).toBe(2);
   });
 
   test("still skips __proto__ and constructor to match client behaviour", () => {

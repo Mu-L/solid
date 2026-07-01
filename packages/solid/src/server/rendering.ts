@@ -156,6 +156,7 @@ export function createComponent<T>(Comp: (props: T) => JSX.Element, props: T): J
   return Comp(props || ({} as T));
 }
 
+export function mergeProps<T>(source: T): T;
 export function mergeProps<T, U>(source: T, source1: U): T & U;
 export function mergeProps<T, U, V>(source: T, source1: U, source2: V): T & U & V;
 export function mergeProps<T, U, V, W>(
