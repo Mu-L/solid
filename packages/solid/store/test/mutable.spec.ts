@@ -8,6 +8,16 @@ test("Object.create(null) is allowed", () => {
   expect(user.name).toBe("John");
 });
 
+test("Object.create(null) with function values in reactive reads", () => {
+  createRoot(() => {
+    const user = createMutable(Object.assign(Object.create(null), { fn: () => 42, name: "John" }));
+    const getValue = createMemo(() => user.fn());
+    expect(getValue()).toBe(42);
+    user.fn = () => 99;
+    expect(getValue()).toBe(99);
+  });
+});
+
 describe("State Mutability", () => {
   test("Setting a property", () => {
     const user = createMutable({ name: "John" });
