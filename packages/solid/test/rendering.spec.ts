@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { createResource } from "../src/index.js";
-import { mergeProps } from "../src/server/rendering.js";
+import { mergeProps, Show, Switch, Match } from "../src/server/rendering.js";
 import { resolveSSRNode } from "dom-expressions/src/server.js";
 
 describe("resolveSSRNode", () => {
@@ -51,6 +51,7 @@ describe("createResource", () => {
     expect(data.loading).toBe(false);
   });
 });
+
 describe("server mergeProps", () => {
   test("preserves properties that shadow Object.prototype methods (toString, valueOf)", () => {
     expect(mergeProps({ toString: 1 }).toString).toBe(1);
@@ -76,5 +77,55 @@ describe("server mergeProps", () => {
     const props = mergeProps({ a: 1 }, { a: 2, b: 3 });
     expect(props.a).toBe(2);
     expect(props.b).toBe(3);
+  });
+});
+
+// A zero-arg function child is treated as a static value rather than a render-prop
+// (see solidjs/solid#1508), since there's nothing for it to receive as an argument.
+// The client (packages/solid/src/render/flow.ts) gates on `child.length > 0` before
+// invoking it as a render-prop; the server implementation needs to agree, or markup
+// rendered with renderToString can diverge from what hydration on the client produces.
+describe("Show with a zero-arg function child", () => {
+  test("is treated like a plain value, same as ErrorBoundary's fallback", () => {
+    function staticChild() {
+      return "static content";
+    }
+    expect(Show({ when: true, children: staticChild as any })).toBe(staticChild as any);
+  });
+
+  test("a render-prop (arity > 0) is still invoked with the value", () => {
+    expect(Show({ when: "hello", keyed: true, children: (item: any) => `got ${item}` })).toBe(
+      "got hello"
+    );
+    // non-keyed: the render-prop receives an accessor, not the raw value
+    expect(Show({ when: "hello", children: (item: any) => `got ${item()}` })).toBe("got hello");
+  });
+});
+
+describe("Switch/Match with a zero-arg function child", () => {
+  test("is treated like a plain value, same as ErrorBoundary's fallback", () => {
+    function staticChild() {
+      return "static content";
+    }
+    const result = Switch({
+      children: Match<unknown>({ when: true, children: staticChild as any })
+    });
+    expect(result).toBe(staticChild as any);
+  });
+
+  test("a render-prop (arity > 0) is still invoked with the value", () => {
+    const keyedResult = Switch({
+      children: Match<unknown>({
+        when: "hello",
+        keyed: true,
+        children: (item: any) => `got ${item}`
+      })
+    });
+    expect(keyedResult).toBe("got hello");
+    // non-keyed: the render-prop receives an accessor, not the raw value
+    const result = Switch({
+      children: Match<unknown>({ when: "hello", children: (item: any) => `got ${item()}` })
+    });
+    expect(result).toBe("got hello");
   });
 });
