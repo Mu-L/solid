@@ -1,5 +1,17 @@
 # solid-element
 
+## 1.9.2
+
+### Patch Changes
+
+- 0bc9c4d: Fix owner marker lookup so nested custom elements can inherit context from ancestor host markers as well as assigned slot markers.
+- Updated dependencies [629dbb8]
+- Updated dependencies [81ae472]
+- Updated dependencies [eb200e8]
+- Updated dependencies [a628bdf]
+- Updated dependencies [a89bac5]
+  - solid-js@1.9.14
+
 ## 1.9.1
 
 ### Patch Changes

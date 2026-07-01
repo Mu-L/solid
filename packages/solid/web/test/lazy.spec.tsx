@@ -10,7 +10,9 @@ describe("lazy() disposal", () => {
   test("nested lazy boundaries remount after navigation-style dispose", async () => {
     const Child: Component<{ label: string }> = props => <span>{props.label}</span>;
     const innerResolvers: Array<(mod: { default: typeof Child }) => void> = [];
-    const InnerLazy = lazy<typeof Child>(() => new Promise(resolve => innerResolvers.push(resolve)));
+    const InnerLazy = lazy<typeof Child>(
+      () => new Promise(resolve => innerResolvers.push(resolve))
+    );
 
     const Route = () => (
       <Suspense fallback="inner-loading">

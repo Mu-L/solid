@@ -1,5 +1,25 @@
 # solid-js
 
+## 1.9.14
+
+### Patch Changes
+
+- 629dbb8: Bump minimum seroval and seroval-plugins to 1.5.4 for security fixes
+- 81ae472: Fix memory leak with nested `lazy()` components. `lazy()` cached its `createResource` accessor in a module-scoped variable and `createResource` never released its Suspense contexts on disposal, so a disposed component tree (and its detached DOM) stayed reachable across navigations when `lazy()` boundaries were nested. The module-pinned accessor is now released on cleanup, and the resource clears its Suspense contexts and pending promise on disposal.
+- eb200e8: Use Object.prototype.hasOwnProperty.call() to support null-prototype objects in store proxies
+- a628bdf: Fix server `mergeProps` silently dropping properties that shadow `Object.prototype` methods.
+
+  `mergeProps` on the server (used during SSR) used `key in target` to skip already-seen keys.
+  Because `in` walks the prototype chain, keys such as `toString`, `valueOf`, and `hasOwnProperty`
+  were always found on the empty result object via `Object.prototype`, causing those source
+  properties to be silently ignored. The merged result then returned the inherited
+  `Object.prototype` method instead of the supplied value.
+
+  The fix replaces the `in` check with `Object.prototype.hasOwnProperty.call(target, key)` and
+  adds explicit guards for `"__proto__"` and `"constructor"` to match the client-side behaviour.
+
+- a89bac5: Fix server `Show`/`Switch` to ignore zero-arg function children, matching client behavior per #1508.
+
 ## 1.9.13
 
 ### Patch Changes
