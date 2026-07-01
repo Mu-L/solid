@@ -172,7 +172,12 @@ export function mergeProps(...sources: any): any {
     if (source) {
       const descriptors = Object.getOwnPropertyDescriptors(source);
       for (const key in descriptors) {
-        if (key in target) continue;
+        if (
+          key === "__proto__" ||
+          key === "constructor" ||
+          Object.prototype.hasOwnProperty.call(target, key)
+        )
+          continue;
         Object.defineProperty(target, key, {
           enumerable: true,
           get() {
